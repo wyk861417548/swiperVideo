@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>swiper</title>
+  <style>
+    body{
+      margin: 0;
+    }
+    .swiper-slide{
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .swiper-slide video{
+      width: 100%;
+      height:200px;
+    }
+  </style>
+  <link rel="stylesheet" href="./static/css/swiper-bundle.min.css">
+</head>
+<body>
+
+  <div class="swiper-container" id="swiper-container2">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide">
+        <video preload  src="./static/video/1.mp4"></video>
+      </div>
+      <div class="swiper-slide" >
+        <video preload src="./static/video/2.mp4"></video>
+      </div>
+      <div class="swiper-slide">
+        <video preload src="./static/video/3.mp4"></video>
+      </div>
+    </div>
+  </div>
+  <script src="./static/js/swiper-bundle.min.js"></script>
+  <script>  
+    var App ={} 
+    
+    // 使用swiper  初始化   以及调用监听滑动方法函数
+    App.swiperPlug = function(){
+      var _this = this;
+
+      _this.pauseListener = function(index){   //做一个开关判断   用来处理用户手动滑动的情况  上一个视频暂停 下一个视频播放
+        for(var n=0;n<_this.AvideoLen;n++){
+          if(n == index){
+            _this.arrBoolean[n] = true;
+          }else{
+            _this.arrBoolean[n] = false;
+          }
+        }
+        // console.log("_this.arrBoolean",_this.arrBoolean,_this.video)
+        _this.playListener(index,_this.arrBoolean);    //
+      }
+
+       //当前视频的播放以及前一个视频的暂停
+       _this.playListener = function(index,arrBoolean){
+        for(var m =0,len=arrBoolean.length;m<len;m++ ){
+          _this.video[m].currentTime = 0;
+          if(arrBoolean[m] == true){
+            _this.video[m].play();
+            _this.video[m].addEventListener("ended",function(){
+              _this.mySwiper.slideNext();
+            })
+          }else{
+            _this.video[m].pause();
+          }
+        }
+      }  
+
+      this.mySwiper = new Swiper ('#swiper-container2', {
+        // direction: 'horizontal', // 垂直切换选项
+        speed:2000,
+        
+        loop: true, // 循环模式选项
+        
+        on:{       //事件
+          //swiper从当前slide开始过渡到另一个slide时执行。  一开始就会触发一次
+          // slideChangeTransitionStart
+          slideChangeTransitionStart: function(){
+            _this.video =_this.video?_this.video:document.querySelectorAll("video");
+            
+            _this.AvideoLen = _this.video.length;
+
+            _this.arrBoolean = new Array(this.AvideoLen); //初始化一个
+
+            var index = this.activeIndex;   //当前滑到哪个视频
+
+            _this.pauseListener(index);   //开关
+            
+          }
+        }
+      }) 
+    }
+
+    App.swiperPlug(); 
+    
+  </script>
+</body>
+</html>
